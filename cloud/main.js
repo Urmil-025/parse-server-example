@@ -21,8 +21,8 @@ if(isProduction) {
 
 
 
-var sendgrid = require("sendgrid");
-sendgrid.initialize("app6274082@heroku.com", "qfb1jdbh2509");
+var sendgrid = require("sendgrid")('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');
+//sendgrid.initialize("app6274082@heroku.com", "qfb1jdbh2509");
 
 var Image = require("parse-image");
 
@@ -500,20 +500,32 @@ Parse.Cloud.define("AlertForReply", function(request, response) {
                             } else {
                             }
 
-                            sendgrid.sendEmail({
-                                to: email,
+                            // sendgrid.sendEmail({
+                            //     to: email,
+                            //     from: "info@admissiontable.com",
+                            //     subject: emailSubject,
+                            //     text: emailMessage
+                            //   }, {
+                            //     success: function(httpResponse) {
+                            //                 response.success("Email sent!");
+                            //            },
+                            //     error: function(httpResponse) {
+                            //                 console.error(httpResponse);
+                            //                 response.error("Uh oh, something went wrong: " + httpResponse);
+                            //            }
+                            // });
+                            sendgrid.send({
+							  	to: email,
                                 from: "info@admissiontable.com",
                                 subject: emailSubject,
                                 text: emailMessage
-                              }, {
-                                success: function(httpResponse) {
-                                            response.success("Email sent!");
-                                       },
-                                error: function(httpResponse) {
-                                            console.error(httpResponse);
-                                            response.error("Uh oh, something went wrong: " + httpResponse);
-                                       }
-                            });
+							}, function(err, json) {
+							  if (err) {
+							  	response.error("Uh oh, something went wrong: " + err);
+							  	return console.error(err); 
+							  }
+							  console.log(json);
+							});
 
                             var smsMessage = currentUserName + " answered you!";
 
@@ -645,20 +657,32 @@ Parse.Cloud.beforeSave("_User", function(request, response) { 
 
 Parse.Cloud.define("emailFeedback", function(request, response) {
 
-  sendgrid.sendEmail({
-    to: "feedback@admissiontable.com",
-    from: request.params.userEmail,
-    subject: "Feedback on app by " + request.params.userName,
-    text: request.params.message
-  }, {
-    success: function(httpResponse) {
-                response.success("Email sent!");
-           },
-    error: function(httpResponse) {
-                console.error(httpResponse);
-                response.error("Uh oh, something went wrong: " + httpResponse);
-           }
-  });
+  // sendgrid.sendEmail({
+  //   to: "feedback@admissiontable.com",
+  //   from: request.params.userEmail,
+  //   subject: "Feedback on app by " + request.params.userName,
+  //   text: request.params.message
+  // }, {
+  //   success: function(httpResponse) {
+  //               response.success("Email sent!");
+  //          },
+  //   error: function(httpResponse) {
+  //               console.error(httpResponse);
+  //               response.error("Uh oh, something went wrong: " + httpResponse);
+  //          }
+  // });
+  sendgrid.send({
+	  	to: "feedback@admissiontable.com",
+        from: request.params.userEmail,
+        subject: "Feedback on app by " + request.params.userName,
+        text: request.params.message
+	}, function(err, json) {
+	  if (err) {
+	  	response.error("Uh oh, something went wrong: " + err);
+	  	return console.error(err); 
+	  }
+	  console.log(json);
+	});
 });
 
 Parse.Cloud.define("deleteUser", function(request, response) {
@@ -780,18 +804,30 @@ Parse.Cloud.define("updateRecoRequestStatus", function(request, response) {
 
                                     var recoEmailMessage = recoAlertMessage + " " + "If you have any questions, feel free to ask on Help Desk or any other topic tables.";
                                     /* send email alert */
-                                    sendgrid.sendEmail({
-                                        to: user.get("email"),
-                                        from: "info@admissiontable.com",
-                                        subject: "Your university shortlists from Admission Table",
-                                        text: recoEmailMessage
-                                        }, {
-                                        success: function(httpResponse) {
-                                             },
-                                        error: function(httpResponse) {
-                                                console.error("Failed to send OTP via email: " + httpResponse);
-                                           }
-                                    });
+                                    // sendgrid.sendEmail({
+                                    //     to: user.get("email"),
+                                    //     from: "info@admissiontable.com",
+                                    //     subject: "Your university shortlists from Admission Table",
+                                    //     text: recoEmailMessage
+                                    //     }, {
+                                    //     success: function(httpResponse) {
+                                    //          },
+                                    //     error: function(httpResponse) {
+                                    //             console.error("Failed to send OTP via email: " + httpResponse);
+                                    //        }
+                                    // });
+
+                                    sendgrid.send({
+									  	to: user.get("email"),
+								        from: "info@admissiontable.com",
+								        subject: "Your university shortlists from Admission Table",
+								        text: recoEmailMessage
+									}, function(err, json) {
+									  if (err) {
+									  	return console.error("Failed to send OTP via email: "+err); 
+									  }
+									  console.log(json);
+									});
 
                                 }, function(error) {
                                     response.error(error);
@@ -919,18 +955,30 @@ Parse.Cloud.define("createOTP", function (request,response) {
 		function(httpResponse) {
 
 		    /* send email alert */
-		    sendgrid.sendEmail({
-                to: personEmail,
-                from: "info@admissiontable.com",
-                subject: "Admission Table verification code",
-                text: otpMessage
-              }, {
-                success: function(httpResponse) {
-                       },
-                error: function(httpResponse) {
-                            console.error("Failed to send OTP via email: " + httpResponse);
-                       }
-            });
+		    // sendgrid.sendEmail({
+      //           to: personEmail,
+      //           from: "info@admissiontable.com",
+      //           subject: "Admission Table verification code",
+      //           text: otpMessage
+      //         }, {
+      //           success: function(httpResponse) {
+      //                  },
+      //           error: function(httpResponse) {
+      //                       console.error("Failed to send OTP via email: " + httpResponse);
+      //                  }
+      //       });
+
+      		sendgrid.send({
+			  	to: personEmail,
+		        from: "info@admissiontable.com",
+		        subject: "Admission Table verification code",
+		        text: otpMessage
+			}, function(err, json) {
+			  if (err) {
+			  	return console.error("Failed to send OTP via email: "+err); 
+			  }
+			  console.log(json);
+			});
 
             var UserVerification = Parse.Object.extend("UserVerification");
             var query = new Parse.Query(UserVerification);
